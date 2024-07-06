@@ -3,6 +3,10 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const TodoList = require('../models/TodoList'); // Assuming Mongoose model for TodoList
+
+
+//todo users
 
 // Login user
 router.post('/login', async (req, res) => {

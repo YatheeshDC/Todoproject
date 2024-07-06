@@ -1,79 +1,60 @@
+
+
+
+
+
 const express = require('express');
 const router = express.Router();
-const TodoList = require('../models/TodoList');
+const TodoList = require('../models/TodoList'); // Adjust path as needed
 
-// Get all todo lists
+// GET all todo lists
 router.get('/', async (req, res) => {
   try {
     const todoLists = await TodoList.find();
     res.json(todoLists);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).send({ message: error.message });
   }
 });
 
-// Create a new todo list
+// POST a new todo list
 router.post('/', async (req, res) => {
   const todoList = new TodoList({
     name: req.body.name,
-    items: req.body.items || []
+    items: []
   });
 
   try {
     const newTodoList = await todoList.save();
     res.status(201).json(newTodoList);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+  } catch (error) {
+    res.status(400).send({ message: error.message });
   }
 });
 
-// Update a todo list
-router.patch('/:id', async (req, res) => {
-  try {
-    const todoList = await TodoList.findById(req.params.id);
-    if (!todoList) {
-      return res.status(404).json({ message: 'Todo list not found' });
-    }
-
-    if (req.body.name) {
-      todoList.name = req.body.name;
-    }
-    if (req.body.items) {
-      todoList.items = req.body.items;
-    }
-
-    const updatedTodoList = await todoList.save();
-    res.json(updatedTodoList);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// Delete a todo list
+// DELETE a todo list by ID
 router.delete('/:id', async (req, res) => {
   try {
-    const todoList = await TodoList.findById(req.params.id);
-    if (!todoList) {
-      return res.status(404).json({ message: 'Todo list not found' });
+    const result = await TodoList.findByIdAndDelete(req.params.id);
+    if (!result) {
+      return res.status(404).send({ message: 'Todo list not found' });
     }
-
-    await todoList.remove();
-    res.json({ message: 'Todo list deleted' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.send({ message: 'Todo list removed successfully' });
+  } catch (error) {
+    res.status(500).send({ message: error.message });
   }
 });
 
-// DELETE todo list by ID
-router.delete('/api/todolists/:id', async (req, res) => {
+// PATCH (update) a todo list by ID
+router.patch('/:id', async (req, res) => {
   try {
-    const todoList = await TodoList.findByIdAndDelete(req.params.id);
-    if (!todoList) {
-      return res.status(404).json({ message: 'Todo list not found' });
+    const updatedTodoList = await TodoList.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updatedTodoList) {
+      return res.status(404).send({ message: 'Todo list not found' });
     }
-    res.status(200).json({ message: 'Todo list deleted successfully' });
+    res.json(updatedTodoList);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
+    res.status(400).send({ message: error.message });
   }
 });
 
